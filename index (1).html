@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Shelf Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1714;
+    --ink-soft: #4a4540;
+    --ink-muted: #8a8480;
+    --paper: #faf8f4;
+    --accent: #b5451b;
+    --accent-light: #f5ece7;
+    --rule: #ddd8ce;
+    --tag-bg: #f0ebe0;
+    --green: #2d6e2d;
+    --green-bg: #edf7ed;
+    --green-border: #b7dbb7;
+    --red: #c0392b;
+    --red-bg: #fdf0ee;
+    --red-border: #f5c0b8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.6; }
+
+  /* NAV */
+  nav { border-bottom: 1px solid var(--rule); background: var(--paper); position: sticky; top: 0; z-index: 100; }
+  .nav-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 64px; }
+  .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--ink); cursor: pointer; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; align-items: center; }
+  .nav-links a { font-size: 0.85rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); text-decoration: none; cursor: pointer; transition: color 0.2s; }
+  .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+  .nav-user { font-size: 0.78rem; color: var(--ink-muted); display: flex; align-items: center; gap: 0.8rem; }
+  .nav-user span { font-weight: 500; color: var(--ink-soft); }
+  .nav-user button { background: none; border: 1px solid var(--rule); color: var(--ink-muted); padding: 0.3rem 0.8rem; border-radius: 3px; font-size: 0.75rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+  .nav-user button:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* HERO */
+  .hero { border-bottom: 1px solid var(--rule); padding: 4rem 2rem 3rem; text-align: center; }
+  .hero-eyebrow { font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); font-weight: 500; margin-bottom: 1rem; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.8rem, 6vw, 5rem); line-height: 1.05; font-weight: 700; color: var(--ink); max-width: 800px; margin: 0 auto 1.2rem; }
+  .hero-sub { font-size: 1rem; color: var(--ink-soft); max-width: 560px; margin: 0 auto 2rem; font-weight: 300; line-height: 1.7; }
+  .hero-rule { width: 40px; height: 2px; background: var(--accent); margin: 0 auto; }
+
+  /* TOPICS BAR */
+  .topics-bar { border-bottom: 1px solid var(--rule); overflow-x: auto; white-space: nowrap; padding: 0 2rem; }
+  .topics-bar-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; }
+  .topic-pill { display: inline-block; padding: 0.8rem 1.2rem; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap; }
+  .topic-pill:hover, .topic-pill.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* BLOG */
+  .blog-section { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem; }
+  .featured-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 3rem; padding-bottom: 3rem; border-bottom: 1px solid var(--rule); }
+  .featured-main { cursor: pointer; }
+  .post-category { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); font-weight: 500; margin-bottom: 0.6rem; display: block; }
+  .featured-main h2 { font-family: 'Playfair Display', serif; font-size: 2rem; line-height: 1.15; font-weight: 700; margin-bottom: 0.8rem; color: var(--ink); }
+  .featured-main p { color: var(--ink-soft); font-size: 0.95rem; line-height: 1.7; font-weight: 300; margin-bottom: 1rem; }
+  .featured-main:hover h2 { color: var(--accent); }
+  .post-meta { font-size: 0.75rem; color: var(--ink-muted); }
+  .featured-side { display: flex; flex-direction: column; gap: 1.4rem; }
+  .side-post { padding-bottom: 1.4rem; border-bottom: 1px solid var(--rule); cursor: pointer; }
+  .side-post:last-child { border-bottom: none; padding-bottom: 0; }
+  .side-post .post-category { font-size: 0.68rem; }
+  .side-post h3 { font-family: 'Playfair Display', serif; font-size: 1.05rem; line-height: 1.3; font-weight: 700; color: var(--ink); }
+  .side-post:hover h3 { color: var(--accent); }
+  .side-post .post-meta { margin-top: 0.4rem; }
+  .section-label { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-muted); font-weight: 500; border-top: 2px solid var(--ink); padding-top: 0.6rem; margin-bottom: 1.5rem; display: inline-block; }
+  .posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+  .post-card { cursor: pointer; }
+  .post-card .post-category { font-size: 0.68rem; margin-bottom: 0.5rem; }
+  .post-card h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; line-height: 1.3; font-weight: 700; color: var(--ink); margin-bottom: 0.6rem; }
+  .post-card:hover h3 { color: var(--accent); }
+  .post-card p { font-size: 0.88rem; color: var(--ink-soft); line-height: 1.65; font-weight: 300; }
+  .post-card .post-meta { margin-top: 0.7rem; }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 6rem 2rem; border: 1px dashed var(--rule); border-radius: 4px; }
+  .empty-state .empty-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--ink-muted); font-style: italic; margin-bottom: 0.6rem; }
+  .empty-state .empty-sub { font-size: 0.88rem; color: var(--ink-muted); }
+  .empty-write-btn { display: inline-block; margin-top: 1.5rem; background: var(--accent); color: white; padding: 0.7rem 1.6rem; border-radius: 4px; font-size: 0.85rem; font-weight: 500; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; }
+  .empty-write-btn:hover { opacity: 0.87; }
+
+  /* LOGIN PAGE */
+  .login-wrap { min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+  .login-box { width: 100%; max-width: 400px; background: white; border: 1px solid var(--rule); border-radius: 6px; padding: 2.5rem; }
+  .login-box .login-logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .login-box .login-sub { font-size: 0.85rem; color: var(--ink-muted); margin-bottom: 2rem; font-weight: 300; }
+  .login-error { display: none; background: var(--red-bg); border: 1px solid var(--red-border); color: var(--red); padding: 0.7rem 1rem; border-radius: 4px; margin-bottom: 1.2rem; font-size: 0.85rem; }
+
+  /* FORMS */
+  .form-group { margin-bottom: 1.2rem; }
+  .form-group label { display: block; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; color: var(--ink-soft); margin-bottom: 0.5rem; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--rule); background: white; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink); border-radius: 4px; outline: none; transition: border-color 0.2s; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); }
+  .form-group textarea { min-height: 360px; resize: vertical; line-height: 1.8; }
+  .btn-primary { background: var(--accent); color: white; border: none; padding: 0.85rem 2rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500; letter-spacing: 0.04em; cursor: pointer; border-radius: 4px; transition: opacity 0.2s; width: 100%; }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-secondary { background: none; color: var(--ink-soft); border: 1px solid var(--rule); padding: 0.6rem 1.2rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer; border-radius: 4px; transition: all 0.2s; }
+  .btn-secondary:hover { border-color: var(--ink-soft); }
+  .btn-danger { background: none; border: 1px solid var(--rule); color: var(--ink-muted); padding: 0.4rem 0.9rem; border-radius: 4px; font-size: 0.78rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+  .btn-danger:hover { border-color: var(--red); color: var(--red); }
+
+  /* WRITE PAGE */
+  .write-page { max-width: 720px; margin: 0 auto; padding: 3rem 2rem; }
+  .write-page h1 { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 0.5rem; }
+  .write-subtitle { color: var(--ink-soft); margin-bottom: 2rem; font-size: 0.95rem; font-weight: 300; }
+  .publish-success { display: none; background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green); padding: 1rem 1.2rem; border-radius: 4px; margin-bottom: 1.5rem; font-size: 0.9rem; }
+
+  /* SINGLE POST */
+  .single-post { max-width: 720px; margin: 0 auto; padding: 3rem 2rem; }
+  .back-btn { font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 0.4rem; margin-bottom: 2rem; background: none; border: none; }
+  .back-btn:hover { color: var(--accent); }
+  .single-post h1 { font-family: 'Playfair Display', serif; font-size: 2.4rem; line-height: 1.15; font-weight: 700; margin-bottom: 1rem; }
+  .single-post .post-meta { margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--rule); }
+  .single-post .body { font-size: 1.05rem; line-height: 1.9; color: var(--ink-soft); font-weight: 300; white-space: pre-wrap; }
+  .post-actions { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--rule); display: flex; gap: 0.8rem; }
+
+  /* ADMIN PAGE */
+  .admin-page { max-width: 860px; margin: 0 auto; padding: 3rem 2rem; }
+  .admin-page h1 { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 0.4rem; }
+  .admin-page .admin-sub { color: var(--ink-muted); font-size: 0.9rem; margin-bottom: 2.5rem; font-weight: 300; }
+  .admin-section { margin-bottom: 3rem; }
+  .admin-section-title { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-muted); font-weight: 500; border-top: 2px solid var(--ink); padding-top: 0.6rem; margin-bottom: 1.5rem; display: inline-block; }
+  .writer-card { background: white; border: 1px solid var(--rule); border-radius: 6px; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.8rem; }
+  .writer-info { display: flex; align-items: center; gap: 1rem; }
+  .writer-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .writer-name { font-weight: 500; font-size: 0.95rem; }
+  .writer-meta { font-size: 0.78rem; color: var(--ink-muted); margin-top: 0.15rem; }
+  .writer-badge { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.2rem 0.6rem; border-radius: 2px; font-weight: 500; }
+  .badge-admin { background: var(--accent-light); color: var(--accent); }
+  .badge-writer { background: var(--tag-bg); color: var(--ink-soft); }
+  .add-writer-form { background: white; border: 1px solid var(--rule); border-radius: 6px; padding: 1.5rem; }
+  .add-writer-form h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 1rem; font-weight: 700; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .add-writer-success { display: none; background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green); padding: 0.7rem 1rem; border-radius: 4px; margin-bottom: 1rem; font-size: 0.85rem; }
+  .add-writer-error { display: none; background: var(--red-bg); border: 1px solid var(--red-border); color: var(--red); padding: 0.7rem 1rem; border-radius: 4px; margin-bottom: 1rem; font-size: 0.85rem; }
+  .change-pw-form { margin-top: 1rem; padding: 1.2rem; background: var(--paper); border-radius: 4px; border: 1px solid var(--rule); }
+  .change-pw-form h3 { font-size: 0.88rem; font-weight: 500; margin-bottom: 0.8rem; }
+
+  /* ABOUT PAGE */
+  .about-page { max-width: 800px; margin: 0 auto; padding: 4rem 2rem; }
+  .about-masthead { border-bottom: 1px solid var(--rule); margin-bottom: 3rem; padding-bottom: 3rem; display: flex; gap: 3rem; align-items: flex-start; }
+  .about-avatar { width: 100px; height: 100px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .about-intro h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .about-tagline { font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); font-weight: 500; margin-bottom: 1rem; }
+  .about-intro p { font-size: 1rem; line-height: 1.8; color: var(--ink-soft); font-weight: 300; }
+  .about-body h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 1rem; margin-top: 2.5rem; font-weight: 700; }
+  .about-body p { font-size: 0.98rem; line-height: 1.8; color: var(--ink-soft); font-weight: 300; margin-bottom: 1rem; }
+  .topic-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+  .topic-tag { background: var(--tag-bg); color: var(--ink-soft); padding: 0.35rem 0.9rem; border-radius: 2px; font-size: 0.78rem; font-weight: 500; }
+  .contact-box { margin-top: 2.5rem; border: 1px solid var(--rule); padding: 2rem; border-radius: 4px; background: white; }
+  .contact-box h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 0.5rem; }
+  .contact-box p { font-size: 0.92rem; color: var(--ink-soft); margin-bottom: 1.2rem; font-weight: 300; }
+  .contact-email-btn { display: inline-flex; align-items: center; gap: 0.6rem; background: var(--accent); color: white; padding: 0.75rem 1.5rem; border-radius: 4px; text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: opacity 0.2s; }
+  .contact-email-btn:hover { opacity: 0.87; }
+
+  footer { border-top: 1px solid var(--rule); padding: 2rem; text-align: center; }
+  footer p { font-size: 0.8rem; color: var(--ink-muted); }
+  footer em { font-family: 'Playfair Display', serif; color: var(--ink); font-style: italic; }
+
+  @media (max-width: 768px) {
+    .featured-grid, .form-row { grid-template-columns: 1fr; }
+    .posts-grid { grid-template-columns: 1fr; }
+    .about-masthead { flex-direction: column; gap: 1.5rem; }
+    .hero h1 { font-size: 2.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-logo" onclick="showPage('home')">The Shelf Report</span>
+    <ul class="nav-links">
+      <li><a onclick="showPage('home')" id="nav-home" class="active">Read</a></li>
+      <li id="nav-write-li" style="display:none"><a onclick="showPage('write')" id="nav-write">Write</a></li>
+      <li id="nav-admin-li" style="display:none"><a onclick="showPage('admin')" id="nav-admin">Admin</a></li>
+      <li><a onclick="showPage('about')" id="nav-about">About</a></li>
+      <li id="nav-login-li"><a onclick="showPage('login')" id="nav-login">Login</a></li>
+    </ul>
+    <div class="nav-user" id="nav-user-info" style="display:none">
+      <span id="nav-username-display"></span>
+      <button onclick="logout()">Sign out</button>
+    </div>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-eyebrow">Independent Analysis &amp; Commentary</div>
+    <h1>The Shelf Report</h1>
+    <p class="hero-sub">Unpacking FMCG, geopolitics, skincare science, pharma litigation, and India's evolving market — one story at a time.</p>
+    <div class="hero-rule"></div>
+  </div>
+  <div class="topics-bar">
+    <div class="topics-bar-inner">
+      <span class="topic-pill active" onclick="filterTopic('all',this)">All</span>
+      <span class="topic-pill" onclick="filterTopic('FMCG & Business',this)">FMCG &amp; Business</span>
+      <span class="topic-pill" onclick="filterTopic('Geopolitics',this)">Geopolitics</span>
+      <span class="topic-pill" onclick="filterTopic('Skincare Science',this)">Skincare Science</span>
+      <span class="topic-pill" onclick="filterTopic('Pharma & Lawsuits',this)">Pharma &amp; Lawsuits</span>
+      <span class="topic-pill" onclick="filterTopic('India Markets',this)">India Markets</span>
+      <span class="topic-pill" onclick="filterTopic('Deals & M&A',this)">Deals &amp; M&amp;A</span>
+      <span class="topic-pill" onclick="filterTopic('Sustainability',this)">Sustainability</span>
+    </div>
+  </div>
+  <div class="blog-section" id="blog-section"></div>
+</div>
+
+<!-- LOGIN -->
+<div id="page-login" class="page">
+  <div class="login-wrap">
+    <div class="login-box">
+      <div class="login-logo">The Shelf Report</div>
+      <div class="login-sub">Writers only. Sign in to publish.</div>
+      <div class="login-error" id="login-error">Incorrect username or password.</div>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="login-username" placeholder="your username" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn-primary" onclick="doLogin()">Sign in</button>
+    </div>
+  </div>
+</div>
+
+<!-- WRITE -->
+<div id="page-write" class="page">
+  <div class="write-page">
+    <h1>Write a Story</h1>
+    <p class="write-subtitle">Your words, your analysis. Hit publish and it goes live instantly.</p>
+    <div class="publish-success" id="publish-success">Published! Head to the homepage to see your story live.</div>
+    <div class="form-group">
+      <label>Headline</label>
+      <input type="text" id="post-title" placeholder="A compelling headline...">
+    </div>
+    <div class="form-group">
+      <label>Category</label>
+      <select id="post-category">
+        <option value="FMCG & Business">FMCG &amp; Business</option>
+        <option value="Geopolitics">Geopolitics</option>
+        <option value="Skincare Science">Skincare Science</option>
+        <option value="Pharma & Lawsuits">Pharma &amp; Lawsuits</option>
+        <option value="India Markets">India Markets</option>
+        <option value="Deals & M&A">Deals &amp; M&amp;A</option>
+        <option value="Sustainability">Sustainability</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Summary (shown on homepage card)</label>
+      <input type="text" id="post-summary" placeholder="One or two sentences that hook the reader...">
+    </div>
+    <div class="form-group">
+      <label>Full Article</label>
+      <textarea id="post-body" placeholder="Write your full analysis here..."></textarea>
+    </div>
+    <button class="btn-primary" style="width:auto" onclick="publishPost()">Publish Story →</button>
+  </div>
+</div>
+
+<!-- SINGLE POST -->
+<div id="page-post" class="page">
+  <div class="single-post">
+    <button class="back-btn" onclick="showPage('home')">← Back to all stories</button>
+    <span class="post-category" id="sp-category"></span>
+    <h1 id="sp-title"></h1>
+    <div class="post-meta" id="sp-meta"></div>
+    <div class="body" id="sp-body"></div>
+    <div class="post-actions" id="post-actions" style="display:none">
+      <button class="btn-danger" onclick="deletePost()">Delete this story</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="page-admin" class="page">
+  <div class="admin-page">
+    <h1>Admin Panel</h1>
+    <p class="admin-sub">Manage writers and your account settings.</p>
+
+    <div class="admin-section">
+      <div class="admin-section-title">Writers</div>
+      <div id="writers-list"></div>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-title">Add a New Writer</div>
+      <div class="add-writer-form">
+        <div class="add-writer-success" id="add-writer-success"></div>
+        <div class="add-writer-error" id="add-writer-error"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Display Name</label>
+            <input type="text" id="new-writer-name" placeholder="e.g. Priya">
+          </div>
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="new-writer-username" placeholder="e.g. priya">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="new-writer-password" placeholder="Choose a password">
+          </div>
+          <div class="form-group" style="display:flex;align-items:flex-end">
+            <button class="btn-primary" onclick="addWriter()">Add Writer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-title">Change Your Password</div>
+      <div class="change-pw-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="new-pw" placeholder="New password">
+          </div>
+          <div class="form-group">
+            <label>Confirm Password</label>
+            <input type="password" id="confirm-pw" placeholder="Confirm password">
+          </div>
+        </div>
+        <div id="pw-msg" style="font-size:0.85rem;margin-bottom:0.8rem;display:none"></div>
+        <button class="btn-secondary" onclick="changePassword()">Update Password</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div id="page-about" class="page">
+  <div class="about-page">
+    <div class="about-masthead">
+      <div class="about-avatar">G</div>
+      <div class="about-intro">
+        <p class="about-tagline">Writer &amp; Analyst</p>
+        <h1>Gahana</h1>
+        <p>I read and try to quantify and analyse the data, trying to understand real-life implications of the cerulean — like Miranda Priestly understood that a simple colour decision in a boardroom eventually trickled all the way down to a bargain bin sweater. Every macro shift has a shelf life, and a shelf price.</p>
+      </div>
+    </div>
+    <div class="about-body">
+      <h2>What this blog covers</h2>
+      <p>The Shelf Report is an independent publication focused on the stories behind the products, deals, and decisions that shape everyday life — from the geopolitics of a supply chain to the lawsuit that quietly reformulated your favourite moisturiser.</p>
+      <p>I write at the intersections most business coverage misses: where FMCG meets foreign policy, where a skincare ingredient's chemistry collides with a courtroom, where India's growth story plays out in the fast-moving consumer space.</p>
+      <div class="topic-tags">
+        <span class="topic-tag">FMCG &amp; Business</span>
+        <span class="topic-tag">Geopolitics</span>
+        <span class="topic-tag">Skincare Science</span>
+        <span class="topic-tag">Pharma &amp; Lawsuits</span>
+        <span class="topic-tag">India Markets</span>
+        <span class="topic-tag">Deals &amp; M&amp;A</span>
+        <span class="topic-tag">Sustainability</span>
+        <span class="topic-tag">International Business</span>
+      </div>
+      <h2>The approach</h2>
+      <p>Not just news summaries — actual analysis. Numbers when they're meaningful. Context when it's missing. And always, the attempt to trace the cerulean: to follow how something abstract and distant lands in a real person's hands.</p>
+    </div>
+    <div class="contact-box">
+      <h2>Get in touch</h2>
+      <p>For pitches, corrections, collaborations, or just a good conversation about markets and global business — reach out via email.</p>
+      <a href="mailto:gahanatiwari99@gmail.com" class="contact-email-btn">✉ &nbsp;gahanatiwari99@gmail.com</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p><em>The Shelf Report</em> &nbsp;·&nbsp; Written by Gahana &nbsp;·&nbsp; All rights reserved</p>
+</footer>
+
+<script>
+// ─── DATA LAYER ───────────────────────────────────────────────────
+function getData(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch(e) { return fallback; }
+}
+function setData(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+
+function initWriters() {
+  const existing = getData('tsr_writers', null);
+  if (!existing) {
+    setData('tsr_writers', [{
+      username: 'gahana',
+      password: 'shelfreport2025',
+      name: 'Gahana',
+      role: 'admin'
+    }]);
+  }
+}
+
+function getWriters() { return getData('tsr_writers', []); }
+function saveWriters(w) { setData('tsr_writers', w); }
+function getPosts() { return getData('tsr_posts', []); }
+function savePosts(p) { setData('tsr_posts', p); }
+
+// ─── AUTH ─────────────────────────────────────────────────────────
+let currentUser = null;
+
+function doLogin() {
+  const username = document.getElementById('login-username').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+  const writers = getWriters();
+  const match = writers.find(w => w.username === username && w.password === password);
+  if (match) {
+    currentUser = match;
+    document.getElementById('login-error').style.display = 'none';
+    document.getElementById('login-username').value = '';
+    document.getElementById('login-password').value = '';
+    updateNav();
+    showPage('write');
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+function logout() {
+  currentUser = null;
+  updateNav();
+  showPage('home');
+}
+
+function updateNav() {
+  const loggedIn = !!currentUser;
+  const isAdmin = currentUser?.role === 'admin';
+  document.getElementById('nav-write-li').style.display = loggedIn ? '' : 'none';
+  document.getElementById('nav-admin-li').style.display = isAdmin ? '' : 'none';
+  document.getElementById('nav-login-li').style.display = loggedIn ? 'none' : '';
+  document.getElementById('nav-user-info').style.display = loggedIn ? '' : 'none';
+  if (loggedIn) document.getElementById('nav-username-display').textContent = currentUser.name;
+}
+
+// ─── POSTS ────────────────────────────────────────────────────────
+let posts = [];
+let currentFilter = 'all';
+let currentPostId = null;
+
+function renderHome() {
+  const filtered = currentFilter === 'all' ? posts : posts.filter(p => p.category === currentFilter);
+  const section = document.getElementById('blog-section');
+
+  if (!filtered.length) {
+    section.innerHTML = `<div class="empty-state">
+      <p class="empty-title">The shelf is empty — for now.</p>
+      <p class="empty-sub">Your first story will appear here once you write it.</p>
+      ${currentUser ? `<button class="empty-write-btn" onclick="showPage('write')">Write your first story →</button>` : ''}
+    </div>`;
+    return;
+  }
+
+  let html = '';
+  if (filtered.length >= 2) {
+    const [main, ...rest] = filtered;
+    const sides = rest.slice(0, 3);
+    const more = rest.slice(3);
+    html += `<div class="featured-grid">
+      <div class="featured-main" onclick="showPost('${main.id}')">
+        <span class="post-category">${main.category}</span>
+        <h2>${main.title}</h2>
+        <p>${main.summary}</p>
+        <div class="post-meta">${main.date} · ${main.author}</div>
+      </div>
+      <div class="featured-side">
+        ${sides.map(p => `<div class="side-post" onclick="showPost('${p.id}')">
+          <span class="post-category">${p.category}</span>
+          <h3>${p.title}</h3>
+          <div class="post-meta">${p.date} · ${p.author}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+    if (more.length) {
+      html += `<div class="section-label">More Stories</div><div class="posts-grid">`;
+      html += more.map(p => postCard(p)).join('');
+      html += `</div>`;
+    }
+  } else {
+    html += `<div class="section-label">Latest Stories</div><div class="posts-grid">`;
+    html += filtered.map(p => postCard(p)).join('');
+    html += `</div>`;
+  }
+  section.innerHTML = html;
+}
+
+function postCard(p) {
+  return `<div class="post-card" onclick="showPost('${p.id}')">
+    <span class="post-category">${p.category}</span>
+    <h3>${p.title}</h3>
+    <p>${p.summary}</p>
+    <div class="post-meta">${p.date} · ${p.author}</div>
+  </div>`;
+}
+
+function filterTopic(topic, el) {
+  currentFilter = topic;
+  document.querySelectorAll('.topic-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  renderHome();
+}
+
+function showPost(id) {
+  const p = posts.find(x => x.id === id);
+  if (!p) return;
+  currentPostId = id;
+  document.getElementById('sp-category').textContent = p.category;
+  document.getElementById('sp-title').textContent = p.title;
+  document.getElementById('sp-meta').textContent = p.date + ' · ' + p.author + ' · The Shelf Report';
+  document.getElementById('sp-body').textContent = p.body;
+  const actions = document.getElementById('post-actions');
+  // show delete only if logged in as admin OR as the post's author
+  const canDelete = currentUser && (currentUser.role === 'admin' || currentUser.name === p.author);
+  actions.style.display = canDelete ? 'flex' : 'none';
+  showPage('post');
+}
+
+function deletePost() {
+  if (!currentPostId || !confirm('Delete this story? This cannot be undone.')) return;
+  posts = posts.filter(p => p.id !== currentPostId);
+  savePosts(posts);
+  currentPostId = null;
+  showPage('home');
+}
+
+function publishPost() {
+  if (!currentUser) { showPage('login'); return; }
+  const title = document.getElementById('post-title').value.trim();
+  const category = document.getElementById('post-category').value;
+  const summary = document.getElementById('post-summary').value.trim();
+  const body = document.getElementById('post-body').value.trim();
+  if (!title || !summary || !body) { alert('Please fill in the headline, summary, and article.'); return; }
+  const date = new Date().toLocaleDateString('en-IN', { year:'numeric', month:'long', day:'numeric' });
+  posts.unshift({ id: 'p' + Date.now(), title, category, summary, body, date, author: currentUser.name });
+  savePosts(posts);
+  ['post-title','post-summary','post-body'].forEach(id => document.getElementById(id).value = '');
+  const msg = document.getElementById('publish-success');
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 4000);
+  renderHome();
+}
+
+// ─── ADMIN ────────────────────────────────────────────────────────
+function renderWriters() {
+  const writers = getWriters();
+  const list = document.getElementById('writers-list');
+  list.innerHTML = writers.map(w => {
+    const initials = w.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+    const postCount = posts.filter(p => p.author === w.name).length;
+    const canRemove = w.role !== 'admin';
+    return `<div class="writer-card">
+      <div class="writer-info">
+        <div class="writer-avatar">${initials}</div>
+        <div>
+          <div class="writer-name">${w.name} <span class="writer-badge ${w.role === 'admin' ? 'badge-admin' : 'badge-writer'}">${w.role}</span></div>
+          <div class="writer-meta">@${w.username} · ${postCount} ${postCount === 1 ? 'story' : 'stories'}</div>
+        </div>
+      </div>
+      ${canRemove ? `<button class="btn-danger" onclick="removeWriter('${w.username}')">Remove</button>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function addWriter() {
+  const name = document.getElementById('new-writer-name').value.trim();
+  const username = document.getElementById('new-writer-username').value.trim().toLowerCase();
+  const password = document.getElementById('new-writer-password').value;
+  const successEl = document.getElementById('add-writer-success');
+  const errorEl = document.getElementById('add-writer-error');
+  successEl.style.display = 'none';
+  errorEl.style.display = 'none';
+
+  if (!name || !username || !password) { errorEl.textContent = 'Please fill in all fields.'; errorEl.style.display = 'block'; return; }
+  const writers = getWriters();
+  if (writers.find(w => w.username === username)) { errorEl.textContent = 'That username is already taken.'; errorEl.style.display = 'block'; return; }
+
+  writers.push({ username, password, name, role: 'writer' });
+  saveWriters(writers);
+  document.getElementById('new-writer-name').value = '';
+  document.getElementById('new-writer-username').value = '';
+  document.getElementById('new-writer-password').value = '';
+  successEl.textContent = `${name} (@${username}) has been added as a writer.`;
+  successEl.style.display = 'block';
+  renderWriters();
+}
+
+function removeWriter(username) {
+  if (!confirm(`Remove this writer? They will no longer be able to log in. Their published stories will remain.`)) return;
+  const writers = getWriters().filter(w => w.username !== username);
+  saveWriters(writers);
+  renderWriters();
+}
+
+function changePassword() {
+  const np = document.getElementById('new-pw').value;
+  const cp = document.getElementById('confirm-pw').value;
+  const msg = document.getElementById('pw-msg');
+  msg.style.display = 'block';
+  if (!np || !cp) { msg.style.color = 'var(--red)'; msg.textContent = 'Please fill in both fields.'; return; }
+  if (np !== cp) { msg.style.color = 'var(--red)'; msg.textContent = 'Passwords do not match.'; return; }
+  if (np.length < 6) { msg.style.color = 'var(--red)'; msg.textContent = 'Password must be at least 6 characters.'; return; }
+  const writers = getWriters();
+  const idx = writers.findIndex(w => w.username === currentUser.username);
+  if (idx > -1) { writers[idx].password = np; saveWriters(writers); currentUser.password = np; }
+  msg.style.color = 'var(--green)';
+  msg.textContent = 'Password updated successfully.';
+  document.getElementById('new-pw').value = '';
+  document.getElementById('confirm-pw').value = '';
+}
+
+// ─── NAV ──────────────────────────────────────────────────────────
+function showPage(name) {
+  // guard write/admin pages
+  if (name === 'write' && !currentUser) { showPage('login'); return; }
+  if (name === 'admin' && currentUser?.role !== 'admin') { showPage('home'); return; }
+
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const el = document.getElementById('nav-' + name);
+  if (el) el.classList.add('active');
+  window.scrollTo(0, 0);
+
+  if (name === 'home') renderHome();
+  if (name === 'admin') renderWriters();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────
+initWriters();
+posts = getPosts();
+updateNav();
+renderHome();
+</script>
+</body>
+</html>
